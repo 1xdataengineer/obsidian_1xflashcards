@@ -133,8 +133,11 @@ function errorBlock(reason: string, inner: string, span: Span, metaSpan: Span): 
 	return { state: { kind: 'error', reason, raw: inner }, span, metaSpan };
 }
 
-const QUESTION_MARKER = /^[ \t]*Question:[ \t]?/m;
-const ANSWER_MARKER = /^[ \t]*Answer:[ \t]?/m;
+// Markers may be the full word or its initial, optionally wrapped in bold
+// (`**`) around the keyword and/or the colon, e.g. `Question:`, `Q:`,
+// `**Q:**`, `**Answer**:`. Case-insensitive.
+const QUESTION_MARKER = /^[ \t]*\*{0,2}(?:Question|Q)\*{0,2}:\*{0,2}[ \t]?/im;
+const ANSWER_MARKER = /^[ \t]*\*{0,2}(?:Answer|A)\*{0,2}:\*{0,2}[ \t]?/im;
 
 /** Split a card body into question/answer by the Question:/Answer: markers. */
 function parseQA(body: string): { question: string; answer: string } {
@@ -152,6 +155,9 @@ function parseQA(body: string): { question: string; answer: string } {
 			question: body.slice(0, a.index).trim(),
 			answer: body.slice(a.index + a[0].length).trim(),
 		};
+	}
+	if (q) {
+		return { question: body.slice(q.index + q[0].length).trim(), answer: '' };
 	}
 	return { question: body.trim(), answer: '' };
 }
