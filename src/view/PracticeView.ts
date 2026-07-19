@@ -150,7 +150,7 @@ export class PracticeView extends ItemView {
 			btn.createDiv({ cls: 'flashcards-rating-label', text: RATING_LABEL[rating] });
 			btn.createDiv({
 				cls: 'flashcards-rating-interval',
-				text: formatInterval(preview.interval),
+				text: formatDelay(Date.parse(preview.next_practice) - now.getTime()),
 			});
 			btn.onclick = (): void => void this.onRate(rating);
 		}
@@ -202,8 +202,14 @@ export class PracticeView extends ItemView {
 				new Date(),
 				crypto.randomUUID(),
 			);
-			if (!written) new Notice('1xFlashcards: card could not be saved.');
-			else this.mergeWritten(cardIndex, written);
+			if (!written) {
+				new Notice('1xFlashcards: card could not be saved.');
+			} else {
+				this.mergeWritten(cardIndex, written);
+				// Cards still in a short-term (learning/relearning) step come back for an
+				// immediate retry: re-queue the updated card at the end of this session.
+				if (written.learning) this.requeue(cardIndex);
+			}
 		} catch (error) {
 			console.error('1xFlashcards: failed to save rating', error);
 			new Notice('1xFlashcards: failed to save your rating.');
@@ -232,6 +238,12 @@ export class PracticeView extends ItemView {
 		this.deck = { ...this.deck, cards };
 	}
 
+	/** Append the (just-updated) card to the session queue for a same-session retry. */
+	private requeue(cardIndex: number): void {
+		const card = this.deck?.cards[cardIndex];
+		if (card) this.queue = [...this.queue, card];
+	}
+
 	private advance(): void {
 		this.index += 1;
 		this.revealed = false;
@@ -247,10 +259,18 @@ function answerOf(card: Card): string {
 	return card.state.kind === 'error' ? '' : card.state.answer;
 }
 
-/** Human-friendly interval label for the rating buttons. */
-function formatInterval(days: number): string {
-	if (days < 1) return '<1d';
-	if (days < 30) return `${days}d`;
+/**
+ * Human-friendly label for the delay until a card's next review, derived from the
+ * next_practice timestamp so short-term (minutes-scale) steps render correctly.
+ */
+function formatDelay(ms: number): string {
+	const minutes = ms / 60_000;
+	if (minutes < 1) return '<1m';
+	if (minutes < 60) return `${Math.round(minutes)}m`;
+	const hours = minutes / 60;
+	if (hours < 24) return `${Math.round(hours)}h`;
+	const days = hours / 24;
+	if (days < 30) return `${Math.round(days)}d`;
 	if (days < 365) return `${Math.round(days / 30)}mo`;
 	return `${Math.round(days / 365)}y`;
 }

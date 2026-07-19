@@ -10,6 +10,7 @@ const meta = (over: Partial<CardMeta>): CardMeta => ({
 	ease_factor: 2.5,
 	interval: 1,
 	repetitions: 1,
+	learning: null,
 	last_practice: '2026-07-01T10:00:00Z',
 	next_practice: '2026-07-01T10:00:00Z',
 	last_20: [],

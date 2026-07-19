@@ -12,6 +12,7 @@ export function serializeFrontmatter(meta: CardMeta): string {
 		`ease_factor: ${meta.ease_factor}`,
 		`interval: ${meta.interval}`,
 		`repetitions: ${meta.repetitions}`,
+		`learning: ${serializeLearning(meta.learning)}`,
 		`last_practice: ${meta.last_practice}`,
 		`next_practice: ${meta.next_practice}`,
 		serializeHistory(meta.last_20),
@@ -19,6 +20,11 @@ export function serializeFrontmatter(meta: CardMeta): string {
 		'',
 	];
 	return lines.join('\n');
+}
+
+function serializeLearning(learning: CardMeta['learning']): string {
+	if (learning === null) return 'null';
+	return `{ phase: ${learning.phase}, step: ${learning.step} }`;
 }
 
 function serializeHistory(events: readonly PracticeEvent[]): string {
