@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "1xflashcards",
+	"name": "1xFlashcards",
 	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"minAppVersion": "1.7.2",
+	"description": "Spaced-repetition flashcards from ad-flashcard blocks in your notes, scheduled with SM-2.",
+	"author": "Andreas Hald",
+	"authorUrl": "https://github.com/1xdataengineer",
 	"isDesktopOnly": false
 }

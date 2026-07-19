@@ -1,8 +1,135 @@
-/*
+/* 1xFlashcards — mobile-first practice panel. Uses Obsidian theme variables so it
+   adapts to light/dark and any theme. Buttons are sized for touch. */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.flashcards-view {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1rem max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom))
+		max(1rem, env(safe-area-inset-left));
+	height: 100%;
+	overflow-y: auto;
+}
 
-If your plugin does not need CSS, delete this file.
+.flashcards-empty,
+.flashcards-summary {
+	margin: auto 0;
+	text-align: center;
+	color: var(--text-muted);
+}
 
-*/
+.flashcards-progress {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	letter-spacing: 0.03em;
+}
+
+.flashcards-question,
+.flashcards-answer {
+	font-size: var(--font-ui-large);
+	line-height: 1.5;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.flashcards-answer {
+	color: var(--text-normal);
+}
+
+.flashcards-divider {
+	border: none;
+	border-top: 1px solid var(--background-modifier-border);
+	margin: 0;
+}
+
+/* Buttons */
+.flashcards-btn {
+	appearance: none;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: 0.85rem 1rem;
+	font-size: var(--font-ui-medium);
+	cursor: pointer;
+	min-height: 44px; /* comfortable touch target */
+	background: var(--interactive-normal);
+	color: var(--text-normal);
+}
+
+.flashcards-btn:hover {
+	background: var(--interactive-hover);
+}
+
+.flashcards-btn-primary {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: transparent;
+	width: 100%;
+}
+
+.flashcards-btn-secondary {
+	margin-top: 1rem;
+}
+
+/* Rating row: single column on phones, wraps to a grid where there's room */
+.flashcards-ratings {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.6rem;
+	margin-top: 0.5rem;
+}
+
+@media (min-width: 480px) {
+	.flashcards-ratings {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+.flashcards-rating {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+}
+
+.flashcards-rating-label {
+	font-weight: var(--font-semibold);
+}
+
+.flashcards-rating-interval {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.flashcards-rating-again {
+	border-color: var(--color-red);
+}
+.flashcards-rating-hard {
+	border-color: var(--color-orange);
+}
+.flashcards-rating-good {
+	border-color: var(--color-green);
+}
+.flashcards-rating-easy {
+	border-color: var(--color-blue);
+}
+
+/* Error surfacing (surface-only, per Q3 — never written back to the file) */
+.flashcards-error-banner {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-warning);
+	background: var(--background-modifier-error-hover);
+	border-radius: var(--radius-s);
+	padding: 0.35rem 0.6rem;
+}
+
+.flashcards-error-list {
+	margin-top: 1rem;
+	text-align: left;
+	font-size: var(--font-ui-small);
+}
+
+.flashcards-error-reason {
+	color: var(--text-muted);
+	padding: 0.25rem 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
