@@ -1,91 +1,91 @@
-# Obsidian Sample Plugin
+# 1xFlashcards
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+## What: 
+A minimal spaced-repetition flashcards plugin for [Obsidian](https://obsidian.md).
+Cards live directly in your notes as `ad-flashcard` blocks, and reviews are scheduled
+with the classic **SM-2** algorithm. Works on iPhone, iPad, and macOS.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Why:
+First, I find that introducing a database to keep track of flashcards is both overkill and a bit of an anti-pattern for obsidian. 
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+Second I like to have all notes about a subject (i.e. book, article, etc.) in **one** file and I find that collapsible admonition-blocks helps keep the files readable, while flashcard are still around the notes they originated from.
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+## Authoring cards
 
-## First time developing plugins?
+Any note that contains one or more `ad-flashcard` blocks is a **deck**. A brand-new
+card is just a question and answer:
 
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
+````markdown
+```ad-flashcard
+Question:
+What is the capital of France?
+Answer:
+Paris
 ```
+````
 
-If you have multiple URLs, you can also do:
+Once you practice it, the plugin writes back the scheduling metadata it owns — a stable
+unique `id`, the SM-2 state, and a capped history — leaving your question/answer text
+untouched byte-for-byte:
 
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
+````markdown
+```ad-flashcard
+---
+id: 3f8c1e42-9b6a-4d2e-8a11-6c0f7b1d9e55
+ease_factor: 2.5
+interval: 6
+repetitions: 3
+last_practice: 2026-07-19T10:00:00.000Z
+next_practice: 2026-07-25T10:00:00.000Z
+last_20:
+  - { rating: good, at: 2026-07-19T10:00:00.000Z }
+---
+Question:
+What is the capital of France?
+Answer:
+Paris
 ```
+````
+
+Multi-line questions and answers are supported. Because the block is tagged
+`ad-flashcard`, the community [Admonition](https://github.com/valentine195/obsidian-admonition)
+plugin will also render it nicely in reading mode if you have it installed.
+
+## Practicing
+
+1. Open a note that contains at least one `ad-flashcard` block.
+2. Run the **Practice deck** command (command palette). It's only enabled when the
+   active note is a deck.
+3. A side panel opens with the session queue: every **due** scheduled card plus every
+   **new** card. Show the answer, then rate it **Again / Hard / Good / Easy**. Each
+   button shows the interval it will schedule.
+
+Cards with malformed metadata are surfaced in the panel (with the reason) and skipped —
+they are never practiced and their text is never rewritten.
+
+## Scheduling (SM-2)
+
+Ratings map to SM-2 quality scores: `again → 1`, `hard → 3`, `good → 4`, `easy → 5`.
+`again` is a lapse (repetitions reset, relearn in 1 day); `hard/good/easy` pass, with
+the ease factor adjusted and the interval following the `1 → 6 → round(interval × EF)`
+progression. The ease factor is floored at 1.3. The scheduler is a single pure function
+(`src/core/schedule.ts`), so swapping in a different algorithm later is a one-file change.
+
+To re-practice a card ahead of schedule, edit its `next_practice` to a past date by hand.
+
+## Development
+
+- `npm i` — install dependencies (Node ≥ 18).
+- `npm run dev` — compile in watch mode.
+- `npm run build` — type-check and produce a production `main.js`.
+- `npm test` / `npm run test:coverage` — run the Vitest suite (the pure core is covered
+  ≥ 80%).
+- `npm run lint` — ESLint with the Obsidian plugin rules.
+
+### Manual install
+
+Copy `main.js`, `styles.css`, and `manifest.json` into
+`VaultFolder/.obsidian/plugins/1xflashcards/`, then enable the plugin in Settings.
 
 ## API Documentation
 

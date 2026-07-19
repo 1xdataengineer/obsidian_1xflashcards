@@ -13,6 +13,9 @@ export default defineConfig(
 		'package.json',
 		'package-lock.json',
 		'tsconfig.json',
+		'vitest.config.mts',
+		'coverage',
+		'tests',
 	]),
 	{
 		languageOptions: {
