@@ -47,9 +47,12 @@ Paris
 ```
 ````
 
-Multi-line questions and answers are supported. Because the block is tagged
-`ad-flashcard`, the community [Admonition](https://github.com/valentine195/obsidian-admonition)
-plugin will also render it nicely in reading mode if you have it installed.
+The `Question:` / `Answer:` markers are flexible: the shorthand `Q:` / `A:` works
+too, as do bold variants like `**Q:**` and `**Answer:**`, and they're
+case-insensitive. Multi-line questions and answers are supported. Because the block
+is tagged `ad-flashcard`, the community
+[Admonition](https://github.com/valentine195/obsidian-admonition) plugin will also
+render it nicely in reading mode if you have it installed.
 
 ## Practicing
 

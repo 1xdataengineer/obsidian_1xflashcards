@@ -208,4 +208,68 @@ describe('parseDeck', () => {
 			throw new Error('expected new card');
 		}
 	});
+
+	it('recognizes the Q:/A: shorthand markers', () => {
+		const text = file(
+			`${FENCE}ad-flashcard`,
+			'Q: What is the capital of France?',
+			'A: Paris',
+			FENCE,
+		);
+		const state = parseDeck('Deck.md', text).cards[0].state;
+		if (state.kind === 'new') {
+			expect(state.question).toBe('What is the capital of France?');
+			expect(state.answer).toBe('Paris');
+		} else {
+			throw new Error('expected new card');
+		}
+	});
+
+	it('recognizes bold **Q:**/**A:** markers (issue #2)', () => {
+		const text = file(
+			`${FENCE}ad-flashcard`,
+			'**Q:** What 5 type of events does the book explain?',
+			'',
+			'**A:** State, Delta, Hybrid, Measurement and Notification events.',
+			FENCE,
+		);
+		const state = parseDeck('Deck.md', text).cards[0].state;
+		if (state.kind === 'new') {
+			expect(state.question).toBe(
+				'What 5 type of events does the book explain?',
+			);
+			expect(state.answer).toBe(
+				'State, Delta, Hybrid, Measurement and Notification events.',
+			);
+		} else {
+			throw new Error('expected new card');
+		}
+	});
+
+	it('recognizes bold **Question:**/**Answer:** markers', () => {
+		const text = file(
+			`${FENCE}ad-flashcard`,
+			'**Question:** 2 + 2?',
+			'**Answer:** 4',
+			FENCE,
+		);
+		const state = parseDeck('Deck.md', text).cards[0].state;
+		if (state.kind === 'new') {
+			expect(state.question).toBe('2 + 2?');
+			expect(state.answer).toBe('4');
+		} else {
+			throw new Error('expected new card');
+		}
+	});
+
+	it('is case-insensitive and strips a lone question marker', () => {
+		const text = file(`${FENCE}ad-flashcard`, 'q: bare prompt', FENCE);
+		const state = parseDeck('Deck.md', text).cards[0].state;
+		if (state.kind === 'new') {
+			expect(state.question).toBe('bare prompt');
+			expect(state.answer).toBe('');
+		} else {
+			throw new Error('expected new card');
+		}
+	});
 });
