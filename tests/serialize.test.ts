@@ -11,6 +11,7 @@ const meta: CardMeta = {
 	ease_factor: 2.5,
 	interval: 6,
 	repetitions: 3,
+	learning: null,
 	last_practice: '2026-07-19T10:00:00Z',
 	next_practice: '2026-07-25T10:00:00Z',
 	last_20: [
@@ -62,6 +63,21 @@ describe('serializeFrontmatter', () => {
 	it('serializes an empty history as an empty list', () => {
 		const fm = serializeFrontmatter({ ...meta, last_20: [] });
 		expect(fm).toMatch(/last_20: \[\]/);
+	});
+
+	it('round-trips a card in a learning step', () => {
+		const learning: CardMeta = {
+			...meta,
+			interval: 0,
+			repetitions: 0,
+			learning: { phase: 'learning', step: 1 },
+		};
+		const fm = serializeFrontmatter(learning);
+		expect(fm).toMatch(/learning: \{ phase: learning, step: 1 \}/);
+		const wrapped = `${FENCE}ad-flashcard\n${fm}Question:\nq\nAnswer:\na\n${FENCE}`;
+		const state = parseDeck('D.md', wrapped).cards[0].state;
+		if (state.kind === 'scheduled') expect(state.meta).toEqual(learning);
+		else throw new Error('expected scheduled');
 	});
 });
 

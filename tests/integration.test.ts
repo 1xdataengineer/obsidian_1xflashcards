@@ -25,7 +25,7 @@ function review(
 }
 
 describe('full core pipeline: parse → schedule → write-back → re-parse', () => {
-	it('takes a new card through two reviews, persisting id and SM-2 state', () => {
+	it('takes a new card through learning into review, persisting id and SM-2 state', () => {
 		const original = file(
 			'# Geography',
 			'',
@@ -37,13 +37,14 @@ describe('full core pipeline: parse → schedule → write-back → re-parse', (
 			FENCE,
 		);
 
-		// First review: new card, rated good.
+		// First review: new card rated good → advances to the 10m learning step.
 		const now1 = new Date('2026-07-19T10:00:00.000Z');
 		const first = review(original, 0, 'good', now1, 'ID-123');
 		expect(first.meta.id).toBe('ID-123');
-		expect(first.meta.interval).toBe(1);
+		expect(first.meta.learning).toEqual({ phase: 'learning', step: 1 });
+		expect(first.meta.interval).toBe(0);
 
-		// Re-parse: the card is now scheduled and body is intact.
+		// Re-parse: the card is scheduled (persisted) and its body is intact.
 		const afterFirst = parseDeck('D.md', first.text).cards[0].state;
 		expect(afterFirst.kind).toBe('scheduled');
 		if (afterFirst.kind === 'scheduled') {
@@ -51,16 +52,22 @@ describe('full core pipeline: parse → schedule → write-back → re-parse', (
 			expect(afterFirst.answer).toBe('Paris');
 		}
 
-		// Second review a week later, rated good again → interval 6, same id.
-		const now2 = new Date('2026-07-26T10:00:00.000Z');
-		const second = review(first.text, 0, 'good', now2, 'IGNORED');
-		expect(second.meta.id).toBe('ID-123');
-		expect(second.meta.interval).toBe(6);
-		expect(second.meta.repetitions).toBe(2);
-		expect(second.meta.last_20).toHaveLength(2);
+		// Second press of good graduates the card to a 1-day review interval.
+		const grad = review(first.text, 0, 'good', now1, 'IGNORED');
+		expect(grad.meta.learning).toBeNull();
+		expect(grad.meta.interval).toBe(1);
+		expect(grad.meta.repetitions).toBe(1);
 
-		// The note prose survived both writes.
-		expect(second.text.startsWith('# Geography')).toBe(true);
+		// A week later, good again → classic SM-2 interval of 6, same id preserved.
+		const now2 = new Date('2026-07-26T10:00:00.000Z');
+		const third = review(grad.text, 0, 'good', now2, 'IGNORED');
+		expect(third.meta.id).toBe('ID-123');
+		expect(third.meta.interval).toBe(6);
+		expect(third.meta.repetitions).toBe(2);
+		expect(third.meta.last_20).toHaveLength(3);
+
+		// The note prose survived every write.
+		expect(third.text.startsWith('# Geography')).toBe(true);
 	});
 
 	it('a freshly-scheduled card drops out of the due queue until next_practice', () => {

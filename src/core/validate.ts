@@ -14,14 +14,23 @@ const practiceEventSchema = z
 	})
 	.strip();
 
+const learningSchema = z
+	.object({
+		phase: z.enum(['learning', 'relearning']),
+		step: z.number().int().min(0),
+	})
+	.strip();
+
 // Lenient about unknown top-level keys (`.strip()`), so future fields never turn a
-// card into an `error`. Strict about the fields we own.
+// card into an `error`. Strict about the fields we own. `learning` defaults to null
+// so cards authored before short-term steps existed validate as review cards.
 const cardMetaSchema = z
 	.object({
 		id: z.string().min(1),
 		ease_factor: z.number().positive(),
 		interval: z.number().min(0),
 		repetitions: z.number().int().min(0),
+		learning: learningSchema.nullable().default(null),
 		last_practice: isoTimestamp,
 		next_practice: isoTimestamp,
 		last_20: z.array(practiceEventSchema).default([]),

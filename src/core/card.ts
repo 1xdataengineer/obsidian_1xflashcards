@@ -11,12 +11,25 @@ export interface PracticeEvent {
 	readonly at: string; // ISO-8601 timestamp
 }
 
+/**
+ * Anki-style short-term step state. When present, the card is between steps
+ * (minutes apart) and should be re-shown within the same session rather than
+ * scheduled a full day out. `null` means the card is a graduated review card.
+ * - `learning`: a brand-new card working through the learning steps.
+ * - `relearning`: a graduated card that lapsed (`again`) and is relearning.
+ */
+export interface LearningState {
+	readonly phase: 'learning' | 'relearning';
+	readonly step: number; // index into the relevant steps array
+}
+
 /** Validated, schedulable metadata: SM-2 bookkeeping + stable id + history. */
 export interface CardMeta {
 	readonly id: string; // globally-unique, clash-proof (crypto.randomUUID)
 	readonly ease_factor: number; // SM-2 EF, floored at 1.3, defaults to 2.5
 	readonly interval: number; // current inter-review interval, in days
 	readonly repetitions: number; // SM-2 n: consecutive successful reviews
+	readonly learning: LearningState | null; // short-term step state, or null when in review
 	readonly last_practice: string; // ISO-8601
 	readonly next_practice: string; // ISO-8601
 	readonly last_20: readonly PracticeEvent[]; // most-recent-last, capped at 20

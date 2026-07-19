@@ -32,6 +32,23 @@ describe('validateMeta', () => {
 		if (res.ok) expect(res.meta.last_20).toEqual([]);
 	});
 
+	it('defaults learning to null for pre-existing cards without the field', () => {
+		const res = validateMeta(good);
+		expect(res.ok).toBe(true);
+		if (res.ok) expect(res.meta.learning).toBeNull();
+	});
+
+	it('accepts a valid learning state', () => {
+		const res = validateMeta({ ...good, learning: { phase: 'relearning', step: 0 } });
+		expect(res.ok).toBe(true);
+		if (res.ok) expect(res.meta.learning).toEqual({ phase: 'relearning', step: 0 });
+	});
+
+	it('rejects an unknown learning phase', () => {
+		const res = validateMeta({ ...good, learning: { phase: 'cramming', step: 0 } });
+		expect(res.ok).toBe(false);
+	});
+
 	it('strips unknown keys but still validates (forward-compatible)', () => {
 		const res = validateMeta({ ...good, future_field: 42 });
 		expect(res.ok).toBe(true);
