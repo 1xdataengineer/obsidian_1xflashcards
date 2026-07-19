@@ -1,7 +1,7 @@
 {
 	"id": "1xflashcards",
 	"name": "1xFlashcards",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "1.7.2",
 	"description": "Spaced-repetition flashcards from ad-flashcard blocks in your notes, scheduled with SM-2.",
 	"author": "Andreas Hald",
