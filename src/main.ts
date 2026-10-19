@@ -1,11 +1,24 @@
 import { MarkdownView, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
 import { PracticeView, VIEW_TYPE_PRACTICE } from './view/PracticeView';
+import { OverviewView, VIEW_TYPE_OVERVIEW } from './view/OverviewView';
 
 // A note is a "deck" if it contains at least one ```ad-flashcard (or ~~~) block.
 const DECK_FENCE = /^[ \t]*(`{3,}|~{3,})[ \t]*ad-flashcard[ \t]*$/m;
 
 export default class FlashcardsPlugin extends Plugin {
 	async onload(): Promise<void> {
+		this.registerView(VIEW_TYPE_OVERVIEW, (leaf) => new OverviewView(leaf));
+		this.addCommand({
+			id: 'flashcard-overview',
+			name: 'Open flashcard overview',
+			callback: async () => {
+				const existing = this.app.workspace.getLeavesOfType(VIEW_TYPE_OVERVIEW)[0];
+				const leaf = existing ?? this.app.workspace.getLeaf('tab');
+				if (!existing) await leaf.setViewState({ type: VIEW_TYPE_OVERVIEW, active: true });
+				else if (leaf.view instanceof OverviewView) await leaf.view.refresh();
+				await this.app.workspace.revealLeaf(leaf);
+			},
+		});
 		this.registerView(
 			VIEW_TYPE_PRACTICE,
 			(leaf) => new PracticeView(leaf),

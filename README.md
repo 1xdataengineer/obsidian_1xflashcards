@@ -66,6 +66,19 @@ render it nicely in reading mode if you have it installed.
 Cards with malformed metadata are surfaced in the panel (with the reason) and skipped —
 they are never practiced and their text is never rewritten.
 
+## Vault overview
+
+Run **Open flashcard overview** from the command palette to scan every Markdown
+note in your vault. The table defaults to cards **due for review**, ordered by
+next review time, with each card's question, status, and a link to its source note.
+Select a note link, then run **Practice deck** to review that deck.
+
+Use **Show** to switch to **New cards** or **All cards**, including upcoming cards
+and invalid cards with their error reasons. New cards are counted separately from
+due reviews. Select **Refresh** after practicing or editing notes to update the
+snapshot. Unreadable notes are listed so incomplete totals are visible. Scanning
+is local, runs only on request, and never changes your notes.
+
 ## Scheduling (SM-2)
 
 Ratings map to SM-2 quality scores: `again → 1`, `hard → 3`, `good → 4`, `easy → 5`.

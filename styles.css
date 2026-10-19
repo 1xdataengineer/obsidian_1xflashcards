@@ -1,3 +1,34 @@
+.flashcards-overview {
+	padding: 1rem;
+	overflow: auto;
+}
+
+.flashcards-overview-controls {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.flashcards-overview-table {
+	overflow-x: auto;
+}
+
+.flashcards-overview table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.flashcards-overview th,
+.flashcards-overview td {
+	padding: 0.65rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	text-align: left;
+	vertical-align: top;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
 /* 1xFlashcards — mobile-first practice panel. Uses Obsidian theme variables so it
    adapts to light/dark and any theme. Buttons are sized for touch. */
 
