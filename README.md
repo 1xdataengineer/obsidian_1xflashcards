@@ -69,13 +69,14 @@ they are never practiced and their text is never rewritten.
 ## Vault overview
 
 Run **Open flashcard overview** from the command palette to scan every Markdown
-note in your vault. The table defaults to cards **due for review**, ordered by
-next review time, with each card's question, status, and a link to its source note.
-Select a note link, then run **Practice deck** to review that deck.
+note in your vault. The table shows one row per note with a filename link and
+counts for **Due**, **New**, **Practiced**, **Upcoming**, and **Invalid** cards.
+Practiced means previously reviewed, including cards that are due again. Hover a
+filename to see its full path. Select its link, then run **Practice deck**.
 
-Use **Show** to switch to **New cards** or **All cards**, including upcoming cards
-and invalid cards with their error reasons. New cards are counted separately from
-due reviews. Select **Refresh** after practicing or editing notes to update the
+The default filter shows decks with due cards. Use **Show** to switch to decks with
+**New cards** or **All decks**. New cards are counted separately from due reviews.
+Select **Refresh** after practicing or editing notes to update the
 snapshot. Unreadable notes are listed so incomplete totals are visible. Scanning
 is local, runs only on request, and never changes your notes.
 

@@ -15,32 +15,32 @@ function scheduled(path: string, at: string) {
 }
 
 describe('vault overview', () => {
-	it('includes every card, separates new and invalid cards, and orders due reviews first', () => {
-		const broken = parseDeck('Broken.md', '```ad-flashcard\n---\nid: bad\n---\nQ: q\nA: a\n```');
-		const rows = buildOverview([
-			fresh,
-			scheduled('Future.md', '2026-07-20T10:00:00Z'),
-			scheduled('Boundary.md', now.toISOString()),
-			broken,
-			scheduled('Overdue.md', '2026-07-01T10:00:00Z'),
-		], now);
-		expect(rows.map((row) => [row.path, row.status])).toEqual([
-			['Overdue.md', 'due'], ['Boundary.md', 'due'], ['New.md', 'new'],
-			['Future.md', 'upcoming'], ['Broken.md', 'error'],
-		]);
-		expect(rows[0]!.card.state.kind).toBe('scheduled');
-	});
-
-	it('keeps separate rows for cards in the same note and leaves source order unchanged', () => {
-		const deck = parseDeck('Two.md', `${text}\n${text}`);
+	it('counts mixed card states in one row per note, including the due boundary', () => {
+		const due = scheduled('Mixed.md', now.toISOString()).cards;
+		const upcoming = scheduled('Mixed.md', '2026-07-20T10:00:00Z').cards;
+		const broken = parseDeck('Mixed.md', '```ad-flashcard\n---\nid: bad\n---\nQ: q\nA: a\n```').cards;
+		const deck = { path: 'Mixed.md', cards: [...due, ...fresh.cards, ...upcoming, ...broken] };
 		const snapshot = JSON.stringify(deck);
-		const rows = buildOverview([deck], now);
-		expect(rows).toHaveLength(2);
-		expect(rows[0]!.card.span.start).toBeLessThan(rows[1]!.card.span.start);
+		expect(buildOverview([deck], now)).toEqual([
+			{ path: 'Mixed.md', due: 1, new: 1, upcoming: 1, error: 1, practiced: 2 },
+		]);
 		expect(JSON.stringify(deck)).toBe(snapshot);
 	});
 
-	it('handles an empty vault', () => {
+	it('aggregates cards in the same note and sorts decks by due, new, then path', () => {
+		const two = { path: 'Two.md', cards: [...fresh.cards, ...fresh.cards] };
+		const rows = buildOverview([
+			fresh, two, scheduled('Due.md', now.toISOString()),
+			scheduled('Z.md', '2026-07-20T10:00:00Z'),
+			scheduled('A.md', '2026-07-20T10:00:00Z'),
+		], now);
+		expect(rows.map((row) => row.path)).toEqual(['Due.md', 'Two.md', 'New.md', 'A.md', 'Z.md']);
+		expect(rows[1]!.new).toBe(2);
+		expect(rows.filter((row) => row.due > 0)).toHaveLength(1);
+	});
+
+	it('omits empty notes and handles an empty vault', () => {
 		expect(buildOverview([], now)).toEqual([]);
+		expect(buildOverview([{ path: 'Empty.md', cards: [] }], now)).toEqual([]);
 	});
 });

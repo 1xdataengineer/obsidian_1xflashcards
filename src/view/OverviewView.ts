@@ -5,10 +5,6 @@ import { readVaultOverview } from '../io/vault-overview';
 
 export const VIEW_TYPE_OVERVIEW = 'flashcards-overview-view';
 
-const LABELS: Record<OverviewStatus, string> = {
-	due: 'Due', new: 'New', upcoming: 'Upcoming', error: 'Invalid',
-};
-
 export class OverviewView extends ItemView {
 	private filter = 'due';
 	private rows: readonly OverviewRow[] = [];
@@ -56,7 +52,7 @@ export class OverviewView extends ItemView {
 		refresh.onclick = () => { void this.refresh(); };
 		const label = controls.createEl('label', { text: 'Show ' });
 		const select = label.createEl('select');
-		const filters = { due: 'Due for review', new: 'New cards', all: 'All cards' };
+		const filters = { due: 'Due for review', new: 'New cards', all: 'All decks' };
 		for (const [value, text] of Object.entries(filters)) {
 			select.createEl('option', { attr: { value }, text });
 		}
@@ -64,7 +60,7 @@ export class OverviewView extends ItemView {
 		select.onchange = () => { this.filter = select.value; this.render(); };
 		if (this.busy) return;
 
-		const count = (status: OverviewStatus): number => this.rows.filter((row) => row.status === status).length;
+		const count = (status: OverviewStatus): number => this.rows.reduce((total, row) => total + row[status], 0);
 		root.createEl('p', {
 			text: `${count('due')} due for review · ${count('new')} new · ${count('upcoming')} upcoming · ${count('error')} invalid`,
 		});
@@ -74,30 +70,30 @@ export class OverviewView extends ItemView {
 			details.createEl('summary', { text: `${this.failedPaths.length} notes could not be read; totals may be incomplete.` });
 			for (const path of this.failedPaths) details.createEl('p', { text: path });
 		}
-		const visible = this.rows.filter((row) => this.filter === 'all' || row.status === this.filter);
+		const visible = this.rows.filter((row) => this.filter === 'all' || (this.filter === 'due' ? row.due > 0 : row.new > 0));
 		if (!visible.length) {
 			root.createEl('p', { text: this.filter === 'due' ? 'No flashcards are due for review.' : 'No flashcards to show.' });
 			return;
 		}
 		const table = root.createDiv({ cls: 'flashcards-overview-table' }).createEl('table');
 		const header = table.createEl('thead').createEl('tr');
-		for (const text of ['Note', 'Question', 'Status', 'Next review']) header.createEl('th', { text });
+		for (const text of ['Filename', 'Due', 'New', 'Practiced', 'Upcoming', 'Invalid']) header.createEl('th', { text });
+		root.createEl('p', { text: 'Practiced counts previously reviewed cards, including cards that are due again.' });
 		const body = table.createEl('tbody');
 		for (const row of visible) {
 			const tr = body.createEl('tr');
 			const link = tr.createEl('td').createEl('a', {
-				text: row.path, cls: 'internal-link', attr: { href: row.path },
+				text: row.path.split('/').pop() ?? row.path,
+				cls: 'internal-link', attr: { href: row.path, title: row.path },
 			});
 			link.onclick = (event) => {
 				event.preventDefault();
 				void this.app.workspace.openLinkText(row.path, '', event.ctrlKey || event.metaKey)
 					.catch(() => { new Notice('Could not open this note. It may have moved; refresh the overview.'); });
 			};
-			const state = row.card.state;
-			tr.createEl('td', { text: state.kind === 'error' ? state.reason : state.question });
-			tr.createEl('td', { text: LABELS[row.status] });
-			tr.createEl('td', { text: state.kind === 'scheduled'
-				? new Date(state.meta.next_practice).toLocaleString() : '—' });
+			for (const count of [row.due, row.new, row.practiced, row.upcoming, row.error]) {
+				tr.createEl('td', { text: String(count) });
+			}
 		}
 	}
 }

@@ -25,7 +25,11 @@
 	border-bottom: 1px solid var(--background-modifier-border);
 	text-align: left;
 	vertical-align: top;
-	white-space: pre-wrap;
+	white-space: nowrap;
+}
+
+.flashcards-overview td:first-child {
+	white-space: normal;
 	overflow-wrap: anywhere;
 }
 
